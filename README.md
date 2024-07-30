@@ -1,1 +1,1 @@
-# java-course-sql
+### Homework: SQL Basics

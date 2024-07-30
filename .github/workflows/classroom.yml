@@ -1,0 +1,77 @@
+name: Autograding Tests
+'on':
+  - push
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    services:
+      postgres:
+        image: postgres:16.3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: db_test
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Run homework.sql
+        env:
+          PGPASSWORD: postgres
+        run: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f homework.sql
+
+      - name: CarTest
+        id: car-test
+        uses: classroom-resources/autograding-command-grader@v1
+        env:
+          PGPASSWORD: postgres
+        with:
+          test-name: CarTest
+          setup-command: ''
+          command: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-car.sql | grep -q 'The table contains only the specified rows.'
+          timeout: 10
+          max-score: 40
+
+      - name: OwnerTest
+        id: owner-test
+        uses: classroom-resources/autograding-command-grader@v1
+        env:
+          PGPASSWORD: postgres
+        with:
+          test-name: OwnerTest
+          setup-command: ''
+          command: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-owner.sql | grep -q 'Owner entries exist.'
+          timeout: 10
+          max-score: 30
+
+      - name: DollTest
+        id: doll-test
+        uses: classroom-resources/autograding-command-grader@v1
+        env:
+          PGPASSWORD: postgres
+        with:
+          test-name: DollTest
+          setup-command: ''
+          command: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-doll.sql | grep -q 'Doll entries exist.'
+          timeout: 10
+          max-score: 30
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          PRIMITIVES-TEST_RESULTS: "${{steps.primitives-test.outputs.result}}"
+          CLASSES-TEST_RESULTS: "${{steps.classes-test.outputs.result}}"
+        with:
+          runners: car-test,owner-test,doll-test
