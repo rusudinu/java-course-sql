@@ -74,4 +74,4 @@ jobs:
           PRIMITIVES-TEST_RESULTS: "${{steps.primitives-test.outputs.result}}"
           CLASSES-TEST_RESULTS: "${{steps.classes-test.outputs.result}}"
         with:
-          runners: car-test,owner-test,doll-test
+          runners: "car-test,owner-test,doll-test"
