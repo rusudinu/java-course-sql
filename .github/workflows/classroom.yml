@@ -20,58 +20,50 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
-      - uses: actions/checkout@v4
-
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install PostgreSQL client
         run: sudo apt-get install -y postgresql-client
-
       - name: Run homework.sql
         env:
           PGPASSWORD: postgres
         run: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f homework.sql
-
       - name: CarTest
-        id: car-test
+        id: cartest
         uses: classroom-resources/autograding-command-grader@v1
-        env:
-          PGPASSWORD: postgres
         with:
           test-name: CarTest
           setup-command: ''
-          command: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-car.sql | grep -q 'The table contains only the specified rows.'
+          command: PGPASSWORD=postgres psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-car.sql
+            | grep -q 'The table contains only the specified rows.'
           timeout: 10
           max-score: 40
-
       - name: OwnerTest
-        id: owner-test
+        id: ownertest
         uses: classroom-resources/autograding-command-grader@v1
-        env:
-          PGPASSWORD: postgres
         with:
           test-name: OwnerTest
           setup-command: ''
-          command: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-owner.sql | grep -q 'Owner entries exist.'
+          command: PGPASSWORD=postgres psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-owner.sql
+            | grep -q 'Owner entries exist.'
           timeout: 10
           max-score: 30
-
       - name: DollTest
-        id: doll-test
+        id: dolltest
         uses: classroom-resources/autograding-command-grader@v1
-        env:
-          PGPASSWORD: postgres
         with:
           test-name: DollTest
           setup-command: ''
-          command: psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-doll.sql | grep -q 'Doll entries exist.'
+          command: PGPASSWORD=postgres psql -h 127.0.0.1 -p 5432 -U postgres -d db_test -f check-doll.sql
+            | grep -q 'Doll entries exist.'
           timeout: 10
           max-score: 30
-
       - name: Autograding Reporter
         uses: classroom-resources/autograding-grading-reporter@v1
         env:
-          PRIMITIVES-TEST_RESULTS: "${{steps.primitives-test.outputs.result}}"
-          CLASSES-TEST_RESULTS: "${{steps.classes-test.outputs.result}}"
+          CARTEST_RESULTS: "${{steps.cartest.outputs.result}}"
+          OWNERTEST_RESULTS: "${{steps.ownertest.outputs.result}}"
+          DOLLTEST_RESULTS: "${{steps.dolltest.outputs.result}}"
         with:
-          runners: "car-test,owner-test,doll-test"
+          runners: cartest,ownertest,dolltest
