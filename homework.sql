@@ -38,18 +38,20 @@
 -- Create the doll table
 
 
--- insert the following dolls into the doll table
--- id | name  | price | owner_id
--- 1  | Elsa  | 20    | 1
--- 2  | Anna  | 15    | 1
-
-
 
 
 -- insert the following owners into the owner table
 -- id | name  | age
 -- 1  | Alice | 25
 -- 2  | Bob   | 30
+
+
+
+
+-- insert the following dolls into the doll table
+-- id | name  | price | owner_id
+-- 1  | Elsa  | 20    | 1
+-- 2  | Anna  | 15    | 1
 
 
 
