@@ -9,5 +9,3 @@ SELECT
         ) THEN 'Owner entries exist.'
         ELSE 'Owner entries do not exist.'
     END as owner_check;
-
-
